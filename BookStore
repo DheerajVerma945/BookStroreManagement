@@ -1,0 +1,111 @@
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+class Book {
+public:
+    string title;
+    string author;
+    double price;
+
+    Book(const string& t, const string& a, double p) : title(t), author(a), price(p) {}
+
+    // Equality operator implementation for Book class
+    bool operator==(const Book& other) const {
+        return (title == other.title && author == other.author && price == other.price);
+    }
+};
+
+class Bookstore {
+private:
+    vector<Book> books;
+    map<string, Book> isbnToBook;
+
+public:
+    void addBook(const string& isbn, const string& title, const string& author, double price) {
+    if (isbnToBook.find(isbn) != isbnToBook.end()) {
+        cout << "Book with ISBN " << isbn << " already exists in the inventory." << endl;
+    } else {
+        Book newBook(title, author, price);
+        books.push_back(newBook);
+        isbnToBook.emplace(isbn, newBook);  // Use emplace to directly construct the pair
+        cout << "Book added to the inventory with ISBN " << isbn << "." << endl;
+    }
+}
+
+    void displayInventory() const {
+        if (books.empty()) {
+            cout << "No books in the inventory." << endl;
+        } else {
+            cout << "Book Inventory:" << endl;
+            cout << setw(20) << "Title" << setw(20) << "Author" << setw(10) << "Price" << setw(15) << "ISBN" << endl;
+            cout << string(65, '-') << endl;
+
+            for (const auto& book : books) {
+                cout << setw(20) << book.title << setw(20) << book.author << setw(10) << book.price
+                     << setw(15) << getIsbnForBook(book) << endl;
+            }
+        }
+    }
+
+private:
+    string getIsbnForBook(const Book& book) const {
+        for (const auto& entry : isbnToBook) {
+            if (entry.second == book) {  // Use the equality operator for comparison
+                return entry.first;
+            }
+        }
+        return "N/A";
+    }
+};
+
+int main() {
+    Bookstore bookstore;
+
+    while (true) {
+        cout << "\nBookstore Management System:\n"
+             << "1. Add Book\n"
+             << "2. Display Inventory\n"
+             << "3. Exit\n"
+             << "Enter your choice: ";
+
+        int choice;
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                string isbn, title, author;
+                double price;
+
+                cout << "Enter book ISBN: ";
+                cin >> isbn;
+
+                cout << "Enter book title: ";
+                cin.ignore();  // Ignore newline left in buffer
+                getline(cin, title);
+
+                cout << "Enter book author: ";
+                getline(cin, author);
+
+                cout << "Enter book price: ";
+                cin >> price;
+
+                bookstore.addBook(isbn, title, author, price);
+                break;
+            }
+            case 2:
+                bookstore.displayInventory();
+                break;
+            case 3:
+                cout << "Exiting Bookstore Management System. Goodbye!" << endl;
+                return 0;
+            default:
+                cout << "Invalid choice. Please try again." << endl;
+        }
+    }
+
+    return 0;
+}
